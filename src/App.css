@@ -1,0 +1,17 @@
+
+.header{
+  background: linear-gradient(
+  180deg, #33a9de, #a3dbf4);
+  padding: 20px 0px;
+}
+.Logo{
+  color:#fff;
+  font-weight: 700;
+  text-align: center;
+}
+.leftSidebar{
+  background: linear-gradient(
+  180deg, #33a9de, #a3dbf4);
+  padding: 50px;
+  color: white;
+}
