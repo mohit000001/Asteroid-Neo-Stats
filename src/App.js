@@ -23,8 +23,11 @@ function App() {
   const [snackMsg, setSnackMsg] = useState('')
   const [lables, setLabels] = useState([])
   const [data, setData] = useState([]);
-  const [fastedAsteroid, setFastedAsteroid] = useState({ id: 1, speed: 15454.45454545 });
-  const [closestAsteroid, setClosestAsteroid] = useState({ id: 2, distance: 48415.5455464545 });
+  const [fastedAsteroid, setFastedAsteroid] = useState({ id: -1, speed: -1 });
+  const [closestAsteroid, setClosestAsteroid] = useState({ id: -1, distance: -1 });
+  const [averageSizeAst , setAverageSizeAst ] = useState(-1);
+  const [startDate , setStartDate] = useState("2021-09-20");
+  const [endDate , setEndDate] = useState("2021-09-25");
   const state = {
     labels: lables,
     datasets: [
@@ -41,8 +44,8 @@ function App() {
   }
   const handleDateSubmit = (e) => {
     e.preventDefault();
-    const startDate = e.target["startDate"].value;
-    const endDate = e.target["endDate"].value;
+    // const startDate = e.target["startDate"].value;
+    // const endDate = e.target["endDate"].value;
 
     if(!startDate || !endDate){
       setSnackMsg('Please select vaild dates');
@@ -91,6 +94,7 @@ function App() {
               speed: b.close_approach_data[0].relative_velocity.kilometers_per_hour,
               closeDateTime: b.close_approach_data[0].close_approach_date_full,
               distance: b.close_approach_data[0].miss_distance.kilometers,
+              size :  b.estimated_diameter.kilometers.estimated_diameter_max
             })
           });
         });
@@ -98,10 +102,12 @@ function App() {
           return Number(a.speed) < Number(b.speed) ? b : a;
         })
         const closestAst = AllAst.reduce((a, b) => {
-          return new Date(a.closeDateTime) > new Date(b.closeDateTime) ? a : b;
+          return Number(a.distance) < Number(b.distance) ? a : b;
         })
+        const averageSizeAst = AllAst.map(a => a.size).reduce((a, b) => a + b) / AllAst.length; 
         setClosestAsteroid(closestAst);
         setFastedAsteroid(fastedAst);
+        setAverageSizeAst(averageSizeAst);
         setLoading(false);
       })
       .catch(function (error) {
@@ -147,36 +153,48 @@ function App() {
             classNamePrefix='MyLoader_'
             > 
           <Grid container>
-            <Grid item xs={4} className="leftSidebar">
+            <Grid item lg={4} md={4} sm={12} className="leftSidebar">
               <form style={{textAlign:'center'}} onSubmit={(e) => { handleDateSubmit(e) }}>
                 {/* Start Date : <br /><input name="startDate" type="date" /> <br /><br />
                 End Date : <br /><input name="endDate" type="date" /><br /><br /> */}
                 <TextField
                   name="startDate"
                   inputProps={{
-                    type: "date"
+                    type: "date",
                   }}
                   label="Start Date"
+                  value={startDate}
+                  onChange={(e)=>{
+                    setStartDate(e.target.value);
+                  }}
                 />  <br /><br />
                 <TextField
                   name="endDate"
                   inputProps={{
-                    type: "date"
+                    type: "date",
                   }}
+                  value={endDate}
                   label="End Date"
+                  onChange={(e)=>{
+                    setEndDate(e.target.value);
+                  }}
                 /> <br /><br />
                 <Button type="submit" variant="outlined"> Submit </Button>
               </form><br /><br />
               {fastedAsteroid ?
                 <div><Typography style={{textAlign:'center'}} variant="h5" component="h5">Fasted Asteroid </Typography>
-                  <Typography style={{textAlign:'center'}} variant="h6" component="h6" >{fastedAsteroid.id} ({fastedAsteroid.speed} KM/H) </Typography><br /><br /> </div>
+               {fastedAsteroid.id !== -1 ? <Typography style={{textAlign:'center', color: "rgb(74 65 64)"}} variant="h6" component="h6" >Id : {fastedAsteroid.id} <br/> Speed : {fastedAsteroid.speed} km/h </Typography>: <Typography style={{textAlign:'center'}}>None</Typography>}<br /><br />  </div> 
                 : null}
               {closestAsteroid ?
                 <div><Typography style={{textAlign:'center'}} variant="h5" component="h5" >Closest Asteroid  </Typography>
-                  <Typography style={{textAlign:'center'}} variant="h6" component="h6" >{closestAsteroid.id} ({closestAsteroid.distance} KM)  </Typography><br /><br /> </div>
+              {closestAsteroid.id !== -1 ? <Typography style={{textAlign:'center', color: "rgb(74 65 64)"}} variant="h6" component="h6" >Id : {closestAsteroid.id} <br/> Distance : {closestAsteroid.distance} km  </Typography>: <Typography style={{textAlign:'center'}}>None</Typography>}<br /><br /> </div>
+                : null}
+              {averageSizeAst ?
+                <div><Typography style={{textAlign:'center'}} variant="h5" component="h5" >Average Asteroid Size </Typography>
+              {averageSizeAst !== -1 ? <Typography style={{textAlign:'center', color: "rgb(74 65 64)"}} variant="h6" component="h6" > {averageSizeAst} km</Typography> : <Typography style={{textAlign:'center'}}>None</Typography>}<br /><br /> </div>
                 : null}
             </Grid>
-            <Grid item xs={8} className="contentArea">
+            <Grid item lg={8} md={8} sm={12} className="contentArea">
               <Line
                 data={state}
                 options={{
@@ -194,6 +212,17 @@ function App() {
             </Grid>
           </Grid>
           </StyledLoader>
+        </Grid>
+        <Grid item xs={12}>
+          <div className="footer">
+            <Typography style={{textAlign:"center"}} variant="h5" component="h6" className="Logo">
+              Asteroid Neo Stats Power by NASA’s Open <a href="https://api.nasa.gov/neo/?api_key=DEMO_KEY
+">API</a> <br/><br/>
+            </Typography>
+            <Typography style={{textAlign:"center"}} className="Logo">
+              Application developed By Mohit Swami
+            </Typography>
+          </div>
         </Grid>
       </Grid>
     </div>
